@@ -183,5 +183,10 @@ def main():
 
 if __name__ == "__main__":
     main()
- """
- https://ezgif.com/sprite-cutter/ezgif-58d35238c9d1f.png"""
+
+
+
+    
+""" https://ezgif.com/sprite-cutter/ezgif-58d35238c9d1f.png"""
+
+"""I am making a 2d python arcade video game. The gameplay will be similar to Risk of Rain Returns, with 3 levels, based of the 7 layers of the underworld in Dante's Inferno. These include lava cave, robot scrapyard, and one other. All 3 are themed as if they are in the underworld. Generate a 10x10 grid, each tile being 128x128 pixels. Using these tiles, generate game asset sprites to use. Include enemy designs, platforms/obstacles, chest, and a player character"""
