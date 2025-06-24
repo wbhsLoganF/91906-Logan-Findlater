@@ -97,15 +97,10 @@ class GameView(arcade.Window):
             "Platforms": {
                 "use_spatial_hash": True
             },
-            "Coins": {
-                "use_spatial_hash": True
-            },
-            "Obstacles":  {
-                "use_spatial_hash": True 
-            }
+
         }
 
-        map_path = os.path.join(os.path.dirname(__file__), "fish_game_map.tmx")
+        map_path = os.path.join(os.path.dirname(__file__), "test_map.tmx")
 
         self.tile_map = arcade.load_tilemap(
             map_path,
