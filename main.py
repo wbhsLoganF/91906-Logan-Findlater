@@ -97,10 +97,15 @@ class GameView(arcade.Window):
             "Platforms": {
                 "use_spatial_hash": True
             },
-
+            "Coins": {
+                "use_spatial_hash": True
+            },
+            "Obstacles":  {
+                "use_spatial_hash": True 
+            }
         }
 
-        map_path = os.path.join(os.path.dirname(__file__), "test_map.tmx")
+        map_path = os.path.join(os.path.dirname(__file__), "TETETTSTSTS.tmx")
 
         self.tile_map = arcade.load_tilemap(
             map_path,
@@ -123,6 +128,7 @@ class GameView(arcade.Window):
         self.player.center_x = WINDOW_WIDTH / 2
         self.player.center_y = WINDOW_HEIGHT / 2
         self.player_sprite_list.append(self.player)
+        self.scene.add_sprite_list_before("Player", "Foreground")
         self.scene.add_sprite("Player", self.player)
 
         self.physics_engine = arcade.PhysicsEnginePlatformer(
@@ -132,7 +138,7 @@ class GameView(arcade.Window):
         self.camera = arcade.Camera2D()
         self.gui_camera = arcade.Camera2D()
 
-        self.background_color = arcade.csscolor.CORNFLOWER_BLUE
+        self.background = arcade.load_texture("BACKGROUND.png")
 
         exit_hit_list = arcade.check_for_collision_with_list
 
@@ -178,10 +184,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
-    
-""" https://ezgif.com/sprite-cutter/ezgif-58d35238c9d1f.png"""
-
-"""I am making a 2d python arcade video game. The gameplay will be similar to Risk of Rain Returns, with 3 levels, based of the 7 layers of the underworld in Dante's Inferno. These include lava cave, robot scrapyard, and one other. All 3 are themed as if they are in the underworld. Generate a 10x10 grid, each tile being 128x128 pixels. Using these tiles, generate game asset sprites to use. Include enemy designs, platforms/obstacles, chest, and a player character"""
+ 
