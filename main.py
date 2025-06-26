@@ -75,7 +75,6 @@ class GameView(arcade.Window):
 
         self.player = None
 
-
         character = ":resources:images/animated_characters/male_adventurer/maleAdventurer"
 
         idle = arcade.load_texture(f"{character}_idle.png")

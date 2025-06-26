@@ -3,12 +3,27 @@
         "height": 4300,
         "width": 2
     },
-    "activeFile": "test_map.tmx",
+    "activeFile": "//wbfp02.westlake.local/shomes/lf21549/Documents/13DTP/Python/91906/91906-Logan-Findlater/TETETTSTSTS.tmx",
     "expandedProjectPaths": [
     ],
+    "file.lastUsedOpenFilter": "All Files (*)",
     "fileStates": {
         "//wbfp02.westlake.local/shomes/lf21549/Documents/13DTP/Python/91906/91906-Logan-Findlater/Assets/map_tile_pieces/Fish/Default/TETSTSTS.tsx": {
-            "dynamicWrapping": false
+            "dynamicWrapping": false,
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "//wbfp02.westlake.local/shomes/lf21549/Documents/13DTP/Python/91906/91906-Logan-Findlater/TETETTSTSTS.tmx": {
+            "scale": 0.9025,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 479.7783933518006,
+                "y": 337.9501385041551
+            }
+        },
+        "//wbfp02.westlake.local/shomes/lf21549/Documents/13DTP/Python/91906/91906-Logan-Findlater/TETETTSTSTS.tmx#TETSTSTS": {
+            "dynamicWrapping": true,
+            "scaleInDock": 1
         },
         "//wbfp02.westlake.local/shomes/lf21549/Documents/13DTP/Python/91906/91906-Logan-Findlater/fish_game_map.tmx": {
             "scale": 0.45125,
@@ -24,6 +39,9 @@
             "scaleInEditor": 1
         },
         "//wbfp02.westlake.local/shomes/lf21549/Documents/13DTP/Python/91906/91906-Logan-Findlater/kenney_fish-pack_2/PNG/Default/fish_game_tileset.tsx": {
+            "scaleInDock": 1
+        },
+        "//wbfp02.westlake.local/shomes/lf21549/Documents/13DTP/Python/91906/Assets/map_tile_pieces/Fish/Default/TETSTSTS.tsx": {
             "scaleInDock": 1
         },
         "//wbfp02.westlake.local/shomes/lf21549/Documents/13DTP/Python/Arcade/fish_game_map.tmx": {
@@ -48,6 +66,14 @@
             "scaleInDock": 1,
             "scaleInEditor": 1
         },
+        "TETETTSTSTS.tmx": {
+            "scale": 1.0826041666666666,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 480.32329452516115,
+                "y": 319.59973058789575
+            }
+        },
         "Tileset Collection.tsx": {
             "dynamicWrapping": true,
             "scaleInDock": 0.33,
@@ -70,11 +96,14 @@
     "last.imagePath": "//wbfp02.westlake.local/shomes/lf21549/Documents/13DTP/Python/91906/91906-Logan-Findlater/Assets/map_tile_pieces/Fish/Default",
     "map.lastUsedFormat": "tmx",
     "openFiles": [
-        "Tileset Collection.tsx",
-        "test_map.tmx"
+        "//wbfp02.westlake.local/shomes/lf21549/Documents/13DTP/Python/91906/91906-Logan-Findlater/Assets/map_tile_pieces/Fish/Default/TETSTSTS.tsx",
+        "//wbfp02.westlake.local/shomes/lf21549/Documents/13DTP/Python/91906/91906-Logan-Findlater/TETETTSTSTS.tmx"
     ],
     "project": "prototype.tiled-project",
     "recentFiles": [
+        "//wbfp02.westlake.local/shomes/lf21549/Documents/13DTP/Python/91906/91906-Logan-Findlater/Assets/map_tile_pieces/Fish/Default/TETSTSTS.tsx",
+        "//wbfp02.westlake.local/shomes/lf21549/Documents/13DTP/Python/91906/91906-Logan-Findlater/TETETTSTSTS.tmx",
+        "TETETTSTSTS.tmx",
         "Tileset Collection.tsx",
         "test_map.tmx",
         "//wbfp02.westlake.local/shomes/lf21549/Documents/13DTP/Python/Arcade/fish_game_map.tmx",
