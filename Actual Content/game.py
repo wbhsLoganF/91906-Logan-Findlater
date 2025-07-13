@@ -171,7 +171,7 @@ class GameView(arcade.Window):
             self.player, walls=self.scene["Platforms"], gravity_constant=GRAVITY
         )
 
-        self.camera = arcade.Camera2D(zoom=0.5)
+        self.camera = arcade.Camera2D(zoom=0.4)
         self.gui_camera = arcade.Camera2D()
 
 

@@ -3,11 +3,17 @@
         "height": 4300,
         "width": 2
     },
-    "activeFile": "//wbfp02.westlake.local/shomes/lf21549/Documents/13DTP/Python/91906/91906-Logan-Findlater/TETETTSTSTS.tmx",
+    "activeFile": "//wbfp02.westlake.local/shomes/lf21549/Downloads/91906/player_frames/test.tmx",
     "expandedProjectPaths": [
     ],
     "file.lastUsedOpenFilter": "All Files (*)",
     "fileStates": {
+        "//wbfp02.westlake.local/shomes/lf21549/Documents/13DTP/Python/91906/91906-Logan-Findlater/Actual Content/'individual images tileset.tsx": {
+            "dynamicWrapping": true
+        },
+        "//wbfp02.westlake.local/shomes/lf21549/Documents/13DTP/Python/91906/91906-Logan-Findlater/Actual Content/new_floor.tsx": {
+            "dynamicWrapping": false
+        },
         "//wbfp02.westlake.local/shomes/lf21549/Documents/13DTP/Python/91906/91906-Logan-Findlater/Assets/map_tile_pieces/Fish/Default/TETSTSTS.tsx": {
             "dynamicWrapping": false,
             "scaleInDock": 1,
@@ -56,6 +62,22 @@
             "dynamicWrapping": false,
             "scaleInDock": 1
         },
+        "//wbfp02.westlake.local/shomes/lf21549/Documents/13DTP/Python/test_collection_lalalalava/new_floor.tsx": {
+            "dynamicWrapping": true,
+            "scaleInDock": 1
+        },
+        "//wbfp02.westlake.local/shomes/lf21549/Downloads/91906/player_frames/Forrest test.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1.5
+        },
+        "//wbfp02.westlake.local/shomes/lf21549/Downloads/91906/player_frames/test.tmx": {
+            "scale": 0.25,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 1728,
+                "y": 2044
+            }
+        },
         "Dead.tsx": {
             "dynamicWrapping": false,
             "scaleInDock": 1,
@@ -98,11 +120,13 @@
     "map.lastUsedFormat": "tmx",
     "map.width": 100,
     "openFiles": [
-        "//wbfp02.westlake.local/shomes/lf21549/Documents/13DTP/Python/91906/91906-Logan-Findlater/Assets/map_tile_pieces/Fish/Default/TETSTSTS.tsx",
-        "//wbfp02.westlake.local/shomes/lf21549/Documents/13DTP/Python/91906/91906-Logan-Findlater/TETETTSTSTS.tmx"
+        "//wbfp02.westlake.local/shomes/lf21549/Downloads/91906/player_frames/Forrest test.tsx",
+        "//wbfp02.westlake.local/shomes/lf21549/Downloads/91906/player_frames/test.tmx"
     ],
     "project": "prototype.tiled-project",
     "recentFiles": [
+        "//wbfp02.westlake.local/shomes/lf21549/Downloads/91906/player_frames/Forrest test.tsx",
+        "//wbfp02.westlake.local/shomes/lf21549/Downloads/91906/player_frames/test.tmx",
         "//wbfp02.westlake.local/shomes/lf21549/Documents/13DTP/Python/91906/91906-Logan-Findlater/Assets/map_tile_pieces/Fish/Default/TETSTSTS.tsx",
         "//wbfp02.westlake.local/shomes/lf21549/Documents/13DTP/Python/91906/91906-Logan-Findlater/TETETTSTSTS.tmx",
         "TETETTSTSTS.tmx",
@@ -112,8 +136,7 @@
         "//wbfp02.westlake.local/shomes/lf21549/Documents/13DTP/Python/91906/91906-Logan-Findlater/fish_game_map.tmx",
         "//wbfp02.westlake.local/shomes/lf21549/Documents/13DTP/Python/91906/91906-Logan-Findlater/fish_game_tileset.tsx",
         "Fishe.tsx",
-        "prototype_character.tsx",
-        "Dead.tsx"
+        "prototype_character.tsx"
     ],
     "tileset.lastUsedFormat": "tsx",
     "tileset.type": 0
