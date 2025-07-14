@@ -1,5 +1,6 @@
 import arcade
 import os
+import random
 
 # Constants
 WINDOW_WIDTH = 1280
@@ -10,7 +11,7 @@ TILE_SCALING = 1
 PLAYER_JUMP_SPEED = 20
 GRAVITY = 1
 
-MOVEMENT_SPEED = 10
+speed_stat = 10
 UPDATES_PER_FRAME = 7
 
 RIGHT_FACING = 0
@@ -18,6 +19,10 @@ LEFT_FACING = 1
 
 CHARACTER_SCALING = 1
 
+#All available
+item_pool = ["SpeedUp", "Nothing!"]
+#Collected items
+item_list = []
 
 class PlayerCharacter(arcade.Sprite):
     def __init__(self, idle_texture_pair, walk_texture_pairs, jump_texture_pair, fall_texture_pair, land_texture_pair):
@@ -176,9 +181,6 @@ class GameView(arcade.Window):
 
 
 
-        exit_hit_list = arcade.check_for_collision_with_list
-
-
     def on_draw(self):
         self.clear()
         self.camera.use()
@@ -227,13 +229,17 @@ class GameView(arcade.Window):
         self.player.change_y = 0
 
     def on_key_press(self, key, modifiers):
+        speed_stat = 5
         if key == arcade.key.E:
             # Check for chests the player is touching
             chest_hit_list = arcade.check_for_collision_with_list(self.player, self.scene["Chests"])
             for chest in chest_hit_list:
                 chest.remove_from_sprite_lists()
 
-                #MOVEMENT_SPEED = 30
+                selected_item = random.choice(item_pool)
+                item_list.append(selected_item)
+                print(item_list)
+
                 #Pop up menu 
                 self.show_popup = True
                 self.popup_timer = 5.0  
@@ -242,20 +248,29 @@ class GameView(arcade.Window):
         elif key in (arcade.key.UP, arcade.key.W, arcade.key.SPACE):
             if self.physics_engine.can_jump():
                 self.player.change_y = PLAYER_JUMP_SPEED
+                
 
         # Move left/right
-        elif key in (arcade.key.LEFT, arcade.key.A):
-            self.player.change_x = -MOVEMENT_SPEED
-        elif key in (arcade.key.RIGHT, arcade.key.D):
-            self.player.change_x = MOVEMENT_SPEED
+        elif key in (arcade.key.LEFT, arcade.key.A) or key in (arcade.key.RIGHT, arcade.key.D):
+
+            for item in item_list:
+                if item == "SpeedUp":
+                    speed_stat +=3
+
+            if key in (arcade.key.LEFT, arcade.key.A):
+                self.player.change_x = -speed_stat
+
+            elif key in (arcade.key.RIGHT, arcade.key.D):
+                self.player.change_x = speed_stat
 
         # Quit
         elif key in (arcade.key.ESCAPE, arcade.key.Q):
             arcade.close_window()
 
         #   Melee Attack
-        elif key in (arcade.key.C):
+        elif key == arcade.key.C:
             print("ow")
+
 
     def on_key_release(self, key, modifiers):
         if key in (arcade.key.LEFT, arcade.key.RIGHT, arcade.key.A, arcade.key.D):
