@@ -86,6 +86,38 @@ class PlayerCharacter(arcade.Sprite):
         direction = self.character_face_direction
         self.texture = self.walk_textures[frame][direction]
 
+class Slash(arcade.Sprite):
+    def __init__(self, textures, direction, position):
+        super().__init__()
+
+        self.textures = textures
+        self.direction = direction
+        self.position = position
+
+        self.frame_index = 0
+        self.frame_timer = 0.05  # <-- This line was missing before
+
+        self.center_x, self.center_y = position
+        self.set_texture(0)
+
+    def set_texture(self, frame_index):
+        tex = self.textures[frame_index]
+        if self.direction == RIGHT_FACING:
+            self.texture = tex
+        else:
+            self.texture = tex.flip_left_right()
+
+    def update(self, delta_time: float = 1/60):
+        self.frame_timer -= delta_time
+        if self.frame_timer <= 0:
+            self.frame_index += 1
+            self.frame_timer = 0.05  # Reset the timer
+
+            if self.frame_index >= len(self.textures):
+                self.remove_from_sprite_lists()
+            else:
+                self.set_texture(self.frame_index)
+
 
 class GameView(arcade.Window):
     def __init__(self):
@@ -101,7 +133,15 @@ class GameView(arcade.Window):
 
         self.player = None
 
-        arcade.set_background_color(arcade.color.ZINNWALDITE_BROWN)
+        background_path = os.path.join(os.path.dirname(__file__), "cave_background.png")
+        bg = arcade.Sprite(background_path)
+        bg.center_x = WINDOW_WIDTH // 2
+        bg.center_y = WINDOW_HEIGHT // 2
+        bg.width = WINDOW_WIDTH
+        bg.height = WINDOW_HEIGHT
+        self.background_list = arcade.SpriteList()
+        self.background_list.append(bg)
+
         #Setting up all player sprite frames
 
         character = os.path.join(os.path.dirname(__file__), "Characters/Player/knight")
@@ -180,10 +220,15 @@ class GameView(arcade.Window):
         self.gui_camera = arcade.Camera2D()
 
 
-
+        #delete
     def on_draw(self):
+
         self.clear()
+        self.background_list.draw()
         self.camera.use()
+
+        self.active_slashes.draw()
+
 
         self.scene.draw()
         self.gui_camera.use()
@@ -211,6 +256,7 @@ class GameView(arcade.Window):
         self.physics_engine.update()
         self.player_sprite_list.update()
         self.player.update_animation(delta_time)
+        self.active_slashes.update(delta_time)
 
         if arcade.check_for_collision_with_list(self.player, self.scene["Obstacles"]):
             self.reset_player_position()
@@ -269,7 +315,14 @@ class GameView(arcade.Window):
 
         #   Melee Attack
         elif key == arcade.key.C:
-            print("ow")
+            print("Slash!")
+            
+            offset_x = 50 if self.player.character_face_direction == RIGHT_FACING else -50
+            slash_x = self.player.center_x + offset_x
+            slash_y = self.player.center_y
+
+            slash = Slash(self.slash_textures, self.player.character_face_direction, (slash_x, slash_y))
+            self.active_slashes.append(slash)
 
 
     def on_key_release(self, key, modifiers):
