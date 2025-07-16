@@ -9,6 +9,7 @@ WINDOW_TITLE = "TITLE"
 
 TILE_SCALING = 1
 PLAYER_JUMP_SPEED = 20
+jump_stat = 20
 GRAVITY = 1
 
 speed_stat = 10
@@ -19,8 +20,14 @@ LEFT_FACING = 1
 
 CHARACTER_SCALING = 1
 
-#All available
-item_pool = ["SpeedUp", "Nothing!"]
+
+speed_stat = 10
+jump_stat = 20
+dmg_stat = 1
+gold_stat = 0
+
+#All available 
+item_pool = ["SpeedUp", "DmgUp", "JumpUp"]
 #Collected items
 item_list = []
 
@@ -86,38 +93,6 @@ class PlayerCharacter(arcade.Sprite):
         direction = self.character_face_direction
         self.texture = self.walk_textures[frame][direction]
 
-class Slash(arcade.Sprite):
-    def __init__(self, textures, direction, position):
-        super().__init__()
-
-        self.textures = textures
-        self.direction = direction
-        self.position = position
-
-        self.frame_index = 0
-        self.frame_timer = 0.05  # <-- This line was missing before
-
-        self.center_x, self.center_y = position
-        self.set_texture(0)
-
-    def set_texture(self, frame_index):
-        tex = self.textures[frame_index]
-        if self.direction == RIGHT_FACING:
-            self.texture = tex
-        else:
-            self.texture = tex.flip_left_right()
-
-    def update(self, delta_time: float = 1/60):
-        self.frame_timer -= delta_time
-        if self.frame_timer <= 0:
-            self.frame_index += 1
-            self.frame_timer = 0.05  # Reset the timer
-
-            if self.frame_index >= len(self.textures):
-                self.remove_from_sprite_lists()
-            else:
-                self.set_texture(self.frame_index)
-
 
 class GameView(arcade.Window):
     def __init__(self):
@@ -133,15 +108,7 @@ class GameView(arcade.Window):
 
         self.player = None
 
-        background_path = os.path.join(os.path.dirname(__file__), "cave_background.png")
-        bg = arcade.Sprite(background_path)
-        bg.center_x = WINDOW_WIDTH // 2
-        bg.center_y = WINDOW_HEIGHT // 2
-        bg.width = WINDOW_WIDTH
-        bg.height = WINDOW_HEIGHT
-        self.background_list = arcade.SpriteList()
-        self.background_list.append(bg)
-
+        arcade.set_background_color(arcade.color.ZINNWALDITE_BROWN)
         #Setting up all player sprite frames
 
         character = os.path.join(os.path.dirname(__file__), "Characters/Player/knight")
@@ -166,14 +133,24 @@ class GameView(arcade.Window):
         self.slash_textures = []
         for i in range(1, 10): 
             path = os.path.join(os.path.dirname(__file__), f"Projectiles/slash{i}.png")
-            tex = arcade.load_texture(path)
-            self.slash_textures.append(tex)
+            texture = arcade.load_texture(path)
+            self.slash_textures.append(texture)
 
         self.active_slashes = arcade.SpriteList()
 
 
-        self.show_popup = False
+        self.show_collected_popup = False
         self.popup_timer = 0
+
+
+        background_path = os.path.join(os.path.dirname(__file__), "cave_background.png")
+        bg = arcade.Sprite(background_path)
+        bg.center_x = WINDOW_WIDTH // 2
+        bg.center_y = WINDOW_HEIGHT // 2
+        bg.width = WINDOW_WIDTH
+        bg.height = WINDOW_HEIGHT
+        self.background_list = arcade.SpriteList()
+        self.background_list.append(bg)
 
 
 
@@ -220,22 +197,19 @@ class GameView(arcade.Window):
         self.gui_camera = arcade.Camera2D()
 
 
-        #delete
-    def on_draw(self):
 
+    def on_draw(self):
         self.clear()
         self.background_list.draw()
         self.camera.use()
-
-        self.active_slashes.draw()
 
 
         self.scene.draw()
         self.gui_camera.use()
 
 
-        if self.show_popup:
-            text = "Chest Collected"
+        if self.show_collected_popup:
+            text = f"{item_list[-1]} Collected"
             font_size = 24
 
             # Estimate width manually or place it near center
@@ -256,17 +230,16 @@ class GameView(arcade.Window):
         self.physics_engine.update()
         self.player_sprite_list.update()
         self.player.update_animation(delta_time)
-        self.active_slashes.update(delta_time)
 
         if arcade.check_for_collision_with_list(self.player, self.scene["Obstacles"]):
             self.reset_player_position()
 
         self.camera.position = self.player.position
 
-        if self.show_popup:
+        if self.show_collected_popup:
             self.popup_timer -= delta_time
             if self.popup_timer <= 0:
-                self.show_popup = False
+                self.show_collected_popup = False
 
     def reset_player_position(self):
         self.player.center_x = WINDOW_WIDTH / 2
@@ -275,25 +248,43 @@ class GameView(arcade.Window):
         self.player.change_y = 0
 
     def on_key_press(self, key, modifiers):
-        speed_stat = 5
+        speed_stat = 10
+        jump_stat = 20
+        dmg_stat = 1
         if key == arcade.key.E:
             # Check for chests the player is touching
             chest_hit_list = arcade.check_for_collision_with_list(self.player, self.scene["Chests"])
             for chest in chest_hit_list:
-                chest.remove_from_sprite_lists()
+                if gold_stat >= 20:
+                    gold_stat -=20
+                    chest.remove_from_sprite_lists()
 
-                selected_item = random.choice(item_pool)
-                item_list.append(selected_item)
-                print(item_list)
+                    selected_item = random.choice(item_pool)
+                    item_list.append(selected_item)
+                    print(item_list)
 
-                #Pop up menu 
-                self.show_popup = True
-                self.popup_timer = 5.0  
+                    if selected_item == "SpeedUp":
+                        print("SPEED UP!")
+                    elif selected_item == "DmgUp":
+                        print("DMG UP!")
+                    elif selected_item == "JumpUp":
+                        print("JUMP UP!")
+
+                    #Pop up menu 
+                    self.show_collected_popup = True
+                    self.popup_timer = 5.0  
+                elif gold_stat < 20:
+                    print("Not enough GOLD!")
+                    
                 
         # Jump
         elif key in (arcade.key.UP, arcade.key.W, arcade.key.SPACE):
             if self.physics_engine.can_jump():
-                self.player.change_y = PLAYER_JUMP_SPEED
+                jump_stat = 20
+                for item in item_list:
+                    if item == "JumpUp":
+                        jump_stat +=3
+                self.player.change_y = jump_stat
                 
 
         # Move left/right
@@ -315,14 +306,10 @@ class GameView(arcade.Window):
 
         #   Melee Attack
         elif key == arcade.key.C:
-            print("Slash!")
+            for item in item_list:
+                if item == "DmgUp":
+                    damage_stat += 1
             
-            offset_x = 50 if self.player.character_face_direction == RIGHT_FACING else -50
-            slash_x = self.player.center_x + offset_x
-            slash_y = self.player.center_y
-
-            slash = Slash(self.slash_textures, self.player.character_face_direction, (slash_x, slash_y))
-            self.active_slashes.append(slash)
 
 
     def on_key_release(self, key, modifiers):
