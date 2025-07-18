@@ -27,7 +27,8 @@ dmg_stat = 1
 gold_stat = 0
 
 #All available 
-item_pool = ["SpeedUp", "DmgUp", "JumpUp"]
+common_item_pool = ["SpeedUp", "DmgUp", "JumpUp"]
+rare_item_pool = ["DoubleJump", "ExtraLife", ]
 #Collected items
 item_list = []
 
@@ -42,6 +43,11 @@ class PlayerCharacter(arcade.Sprite):
         self.was_on_ground_last_frame = True
         self.land_frame_timer = 0
 
+        self.on_ground = True
+
+        self.falling = False
+        self.jumping = False
+
         
         self.walk_textures = walk_texture_pairs
         self.idle_texture_pair = idle_texture_pair
@@ -50,37 +56,37 @@ class PlayerCharacter(arcade.Sprite):
         self.land_texture_pair = land_texture_pair
         self.roll_textures = roll_texture_pairs
 
-        self.was_on_ground_last_frame = True
 
         super().__init__(self.idle_texture_pair[0], scale=CHARACTER_SCALING)
 
     def update_animation(self, delta_time: float = 1 / 60):
 
+        # Change player texture directions left/right
         if self.change_x < 0:
             self.character_face_direction = LEFT_FACING
         elif self.change_x > 0:
             self.character_face_direction = RIGHT_FACING
 
-
+    	# Jumping
         if self.change_y > 0:
             self.texture = self.jump_texture_pair[self.character_face_direction]
             return
 
-        on_ground = self.change_y == 0
         # Just landed = start landing animation
-        if on_ground and not self.was_on_ground_last_frame:
+        if self.change_y != 0 and not self.was_on_ground_last_frame:
             self.texture = self.land_texture_pair[self.character_face_direction]
             self.land_frame_timer = 0.15  
             self.was_on_ground_last_frame = True
             return
-        # If landing timer is active, keep showing landing texture
+        # Hold the landing player texture
         if self.land_frame_timer > 0:
             self.land_frame_timer -= delta_time
             self.texture = self.land_texture_pair[self.character_face_direction]
             return
 
         # Falling
-        if self.change_y < 0:
+        if self.change_y :
+            print("FALLING TEXTURE SHOULD BE APPLIED")
             self.texture = self.fall_texture_pair[self.character_face_direction]
             self.was_on_ground_last_frame = False
             return
@@ -90,6 +96,7 @@ class PlayerCharacter(arcade.Sprite):
             self.texture = self.idle_texture_pair[self.character_face_direction]
             return
         
+        # Walking
         self.cur_texture += 1
         if self.cur_texture >= 8 * UPDATES_PER_FRAME:
             self.cur_texture = 0
@@ -118,7 +125,6 @@ class GameView(arcade.Window):
         self.player_sprite_list = None
         self.physics_engine = None
         self.background = None
-
         self.player = None
 
         self.is_rolling = False
@@ -127,7 +133,7 @@ class GameView(arcade.Window):
         self.roll_cooldown_timer = 0
         self.roll_direction = 0
 
-        arcade.set_background_color(arcade.color.ZINNWALDITE_BROWN)
+
         #Setting up all player sprite frames
 
         character = os.path.join(os.path.dirname(__file__), "Characters/Player/knight")
@@ -257,10 +263,10 @@ class GameView(arcade.Window):
         self.player_sprite_list.update()
         self.player.update_animation(delta_time)
 
+        self.camera.position = self.player.position
+
         if arcade.check_for_collision_with_list(self.player, self.scene["Obstacles"]):
             self.reset_player_position()
-
-        self.camera.position = self.player.position
 
         if self.show_collected_popup:
             self.popup_timer -= delta_time
@@ -271,8 +277,14 @@ class GameView(arcade.Window):
         self.player.is_rolling = self.is_rolling
         if self.is_rolling:
             self.roll_timer -= delta_time
-            roll_speed = 10
+            # Bigger boost if in air
+            if self.player.change_y != 0:
+                roll_speed = 50
+            else:
+                roll_speed = 20
+
             self.player.change_x = self.roll_direction * roll_speed
+                
 
             if self.roll_timer <= 0:
                 self.is_rolling = False
@@ -301,6 +313,7 @@ class GameView(arcade.Window):
         dmg_stat = 1
         
         if key == arcade.key.E:
+            gold_stat = self.gold_stat
             # Check for chests the player is touching
             chest_hit_list = arcade.check_for_collision_with_list(self.player, self.scene["Chests"])
             for chest in chest_hit_list:
@@ -308,7 +321,7 @@ class GameView(arcade.Window):
                     gold_stat -= 20
                     chest.remove_from_sprite_lists()
 
-                    selected_item = random.choice(item_pool)
+                    selected_item = random.choice(common_item_pool)
                     item_list.append(selected_item)
                     print(item_list)
 
