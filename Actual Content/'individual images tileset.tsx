@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.10" tiledversion="1.11.2" name="'individual images tileset" tilewidth="164" tileheight="128" tilecount="21" columns="0">
+<tileset version="1.10" tiledversion="1.11.2" name="'individual images tileset" tilewidth="164" tileheight="128" tilecount="26" columns="0">
  <grid orientation="orthogonal" width="1" height="1"/>
  <tile id="0">
   <image source="roof_cave_trans.png" width="164" height="64"/>
@@ -76,6 +76,28 @@
    <frame tileid="29" duration="200"/>
    <frame tileid="28" duration="200"/>
    <frame tileid="27" duration="200"/>
+  </animation>
+ </tile>
+ <tile id="32">
+  <image source="Characters/Enemies/spider5.png" width="64" height="64"/>
+ </tile>
+ <tile id="33">
+  <image source="Characters/Enemies/spider4.png" width="64" height="64"/>
+ </tile>
+ <tile id="34">
+  <image source="Characters/Enemies/spider3.png" width="64" height="64"/>
+ </tile>
+ <tile id="35">
+  <image source="Characters/Enemies/spider2.png" width="64" height="64"/>
+ </tile>
+ <tile id="36">
+  <image source="Characters/Enemies/spider1.png" width="64" height="64"/>
+  <animation>
+   <frame tileid="36" duration="100"/>
+   <frame tileid="35" duration="100"/>
+   <frame tileid="34" duration="100"/>
+   <frame tileid="33" duration="100"/>
+   <frame tileid="32" duration="100"/>
   </animation>
  </tile>
 </tileset>

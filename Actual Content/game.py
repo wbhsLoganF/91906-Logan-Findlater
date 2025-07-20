@@ -80,7 +80,6 @@ class PlayerCharacter(arcade.Sprite):
         # Just landed = start landing animation
         if self.change_y == 0 and not self.was_on_ground_last_frame:
             self.texture = self.land_texture_pair[self.character_face_direction]
-            self.land_frame_timer = 0.15  
             self.was_on_ground_last_frame = True
             return
         # Hold the landing player texture
@@ -192,10 +191,13 @@ class GameView(arcade.Window):
             self.slash_textures.append((texture, texture.flip_left_right()))
 
 
-
+        self.show_gold = True
 
         self.show_collected_popup = False
         self.popup_timer = 0
+        self.show_dmg_popup = False
+        self.show_door_popup = False
+        self.show_gold = True
 
 
         background_path = os.path.join(os.path.dirname(__file__), "cave_background.png")
@@ -220,11 +222,16 @@ class GameView(arcade.Window):
             },
             "Obstacles":  {
                 "use_spatial_hash": True 
+            },
+            "Moving_enemies": {
+                "use_spatial_hash": True
+            },
+            "Enemies": {
+            "use_spatial_hash": True
             }
         }
-        map_path = os.path.join(os.path.dirname(__file__), "stage_1.json")
+        map_path = os.path.join(os.path.dirname(__file__), "stage_1.tmx")
         self.tile_map = arcade.load_tilemap(map_path, scaling=TILE_SCALING, layer_options=layer_options, use_spatial_hash=True)
-
         self.scene = arcade.Scene.from_tilemap(self.tile_map)
 
 
@@ -255,10 +262,6 @@ class GameView(arcade.Window):
         self.gui_camera = arcade.Camera2D()
 
 
-
-    
-
-
     def on_update(self, delta_time):
         self.physics_engine.update()
         self.player_sprite_list.update()
@@ -267,19 +270,27 @@ class GameView(arcade.Window):
 
         self.camera.position = self.player.position
 
-        if arcade.check_for_collision_with_list(self.player, self.scene["Obstacles"]):
+        if arcade.check_for_collision_with_list(self.player, self.scene["Obstacles"]) or arcade.check_for_collision_with_list(self.player, self.scene["Moving_enemies"]) or arcade.check_for_collision_with_list(self.player, self.scene["Enemies"]):
             self.reset_player_position()
+            self.show_dmg_popup = True
+            self.popup_timer = 5.0
+
+        if self.show_dmg_popup: 
+            self.popup_timer -= delta_time
+            if self.popup_timer <= 0:
+                self.show_dmg_popup = False
 
         if self.show_collected_popup:
             self.popup_timer -= delta_time
             if self.popup_timer <= 0:
                 self.show_collected_popup = False
 
+
         # Rolling
         self.player.is_rolling = self.is_rolling
         if self.is_rolling:
             self.roll_timer -= delta_time
-            # Bigger boost if in air
+            # Bigger roll boost if in air
             if self.player.change_y != 0:
                 roll_speed = 25
             else:
@@ -326,25 +337,9 @@ class GameView(arcade.Window):
             else:
                 self.player.is_attacking = False
                 self.player.cur_swing_frame = 0
-
-            if self.slash_sprite:
-                # Always follow the player
-                self.slash_sprite.center_x = self.player.center_x
-                self.slash_sprite.center_y = self.player.center_y
-
-                # Increment frame timer
-                self.slash_timer += 1
-
-                if self.slash_timer >= UPDATES_PER_FRAME:
-                    self.slash_timer = 0
-                    self.slash_frame += 1
-
-                    if self.slash_frame >= len(self.slash_textures):
-                        # Animation finished
-                        self.slash_sprite = None
-                    else:
-                        direction = self.player.character_face_direction
-                        self.slash_sprite.texture = self.slash_textures[self.slash_frame][direction]
+        
+        if len(self.scene["Chests"]) == 0:
+            self.show_door_popup = True 
 
 
 
@@ -360,10 +355,6 @@ class GameView(arcade.Window):
         self.player.change_y = 0
 
     def on_key_press(self, key, modifiers):
-        speed_stat = 10
-        jump_stat = 20
-        dmg_stat = 1
-        
         if key == arcade.key.E:
             gold_stat = self.base_gold
             # Check for chests the player is touching
@@ -463,33 +454,65 @@ class GameView(arcade.Window):
                 self.last_direction_key = "left" if self.left_held else None
 
     def on_draw(self):
-            self.clear()
-            self.background_list.draw()
-            self.camera.use()
+        self.clear()
+        self.background_list.draw()
+        self.camera.use()
 
 
-            self.scene.draw()
-            if self.slash_sprite:
-                self.slash_sprite.draw()
-            self.gui_camera.use()
+        self.scene.draw()
+        if self.slash_sprite:
+            self.slash_sprite.draw()
+        self.gui_camera.use()
 
 
 
+        if self.show_dmg_popup:
+            text= f"You died and lost all of your gold!"
+            font_size = 24
+            x = WINDOW_WIDTH // 2 - 100 
+            y = 40 
+            self.base_gold = 0
+            arcade.draw_text(
+                text,
+                x,
+                y,
+                arcade.color.WHITE,
+                font_size,
+                 bold=True
+            )
 
-            if self.show_collected_popup:
-                text = f"{item_list[-1]} Collected"
-                font_size = 24
-                x = WINDOW_WIDTH // 2 - 100 
-                y = 40 
+        if self.show_collected_popup:
+            text = f"{item_list[-1]} Collected"
+            font_size = 24
+            x = WINDOW_WIDTH // 2 - 100 
+            y = 40 
 
-                arcade.draw_text(
-                    text,
-                    x,
-                    y,
-                    arcade.color.WHITE,
-                    font_size,
-                    bold=True
-                )
+            arcade.draw_text(
+                text,
+                x,
+                y,
+                arcade.color.WHITE,
+                font_size,
+                bold=True
+            )
+        
+        if self.show_door_popup:
+            self.popup_timer = 10
+
+        if self.show_gold: 
+            text = f"Gold: {self.base_gold}"
+            font_size = 18
+            x = WINDOW_WIDTH // 1 - 100 
+            y = 10
+
+            arcade.draw_text(
+                text,
+                x,
+                y,
+                arcade.color.WHITE,
+                font_size,
+            )
+
 def main():
     window = GameView()
     window.setup()
