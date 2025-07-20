@@ -33,11 +33,12 @@ rare_item_pool = ["DoubleJump", "ExtraLife", ]
 item_list = []
 
 class PlayerCharacter(arcade.Sprite):
-    def __init__(self, idle_texture_pair, walk_texture_pairs, jump_texture_pair, fall_texture_pair, land_texture_pair, roll_texture_pairs):
+    def __init__(self, idle_texture_pair, walk_texture_pairs, jump_texture_pair, fall_texture_pair, land_texture_pair, roll_texture_pairs, swing_texture_pairs):
         self.character_face_direction = RIGHT_FACING
         self.cur_texture = 0
 
         self.roll_texture_pairs = roll_texture_pairs
+        self.swing_texture_pairs = swing_texture_pairs
         self.cur_roll_frame = 0
 
         self.was_on_ground_last_frame = True
@@ -50,12 +51,16 @@ class PlayerCharacter(arcade.Sprite):
 
         
         self.walk_textures = walk_texture_pairs
+        self.swing_textures = swing_texture_pairs
         self.idle_texture_pair = idle_texture_pair
         self.jump_texture_pair = jump_texture_pair
         self.fall_texture_pair = fall_texture_pair
         self.land_texture_pair = land_texture_pair
         self.roll_textures = roll_texture_pairs
 
+
+        self.is_attacking = False
+        self.cur_swing_frame = 0
 
         super().__init__(self.idle_texture_pair[0], scale=CHARACTER_SCALING)
 
@@ -73,7 +78,7 @@ class PlayerCharacter(arcade.Sprite):
             return
 
         # Just landed = start landing animation
-        if self.change_y != 0 and not self.was_on_ground_last_frame:
+        if self.change_y == 0 and not self.was_on_ground_last_frame:
             self.texture = self.land_texture_pair[self.character_face_direction]
             self.land_frame_timer = 0.15  
             self.was_on_ground_last_frame = True
@@ -84,12 +89,6 @@ class PlayerCharacter(arcade.Sprite):
             self.texture = self.land_texture_pair[self.character_face_direction]
             return
 
-        # Falling
-        if self.change_y :
-            print("FALLING TEXTURE SHOULD BE APPLIED")
-            self.texture = self.fall_texture_pair[self.character_face_direction]
-            self.was_on_ground_last_frame = False
-            return
 
         # Idle
         if self.change_x == 0:
@@ -97,20 +96,30 @@ class PlayerCharacter(arcade.Sprite):
             return
         
         # Walking
-        self.cur_texture += 1
-        if self.cur_texture >= 8 * UPDATES_PER_FRAME:
-            self.cur_texture = 0
-        frame = self.cur_texture // UPDATES_PER_FRAME
-        direction = self.character_face_direction
-        self.texture = self.walk_textures[frame][direction]
+        if self.change_x != 0 and self.change_y == 0:
+            self.cur_texture += 1
+            if self.cur_texture >= 8 * UPDATES_PER_FRAME:
+                self.cur_texture = 0
+            frame = self.cur_texture // UPDATES_PER_FRAME
+            direction = self.character_face_direction
+            self.texture = self.walk_textures[frame][direction]
 
-        if hasattr(self, "is_rolling") and self.is_rolling:
+        if self.is_rolling:
             total_frames = len(self.roll_texture_pairs)
             frame = self.cur_roll_frame // UPDATES_PER_FRAME
             if frame >= total_frames:
-                frame = total_frames - 1  # Stay on last frame if rolled too far
+                frame = total_frames - 1  # Stay on the last frame if past the end
             self.texture = self.roll_texture_pairs[frame][self.character_face_direction]
             self.cur_roll_frame += 1
+
+            if self.change_y == 0:
+                self.texture = self.roll_texture_pairs[frame][self.character_face_direction]
+                self.cur_roll_frame += 1
+            elif self.change_y < 0:
+                self.texture = self.fall_texture_pair[self.character_face_direction]
+                self.was_on_ground_last_frame = False
+                return
+            
             return
 
 
@@ -127,12 +136,20 @@ class GameView(arcade.Window):
         self.background = None
         self.player = None
 
+        self.left_held = False
+        self.right_held = False
+        self.last_direction_key = None
+
         self.is_rolling = False
         self.roll_timer = 0
         self.can_roll = True
         self.roll_cooldown_timer = 0
         self.roll_direction = 0
 
+        self.base_speed = 10
+        self.base_jump = 20
+        self.base_dmg = 1
+        self.base_gold = 0
 
         #Setting up all player sprite frames
 
@@ -160,16 +177,21 @@ class GameView(arcade.Window):
             texture = arcade.load_texture(f"{character}_roll{frame}.png")
             self.roll_textures.append((texture, texture.flip_left_right()))
 
+        self.swing_textures = []
+        for frame in range(1,4):
+            texture = arcade.load_texture(f"{character}_swing{frame}.png")
+            self.swing_textures.append((texture, texture.flip_left_right()))
 
-        
-        #Player attack animation frames
         self.slash_textures = []
-        for i in range(1, 10): 
-            path = os.path.join(os.path.dirname(__file__), f"Projectiles/slash{i}.png")
-            texture = arcade.load_texture(path)
-            self.slash_textures.append(texture)
+        self.slash_sprite = None
+        self.slash_frame = 0
+        self.slash_timer = 0
+        for frame in range(1, 10):
+            path = os.path.join(os.path.dirname(__file__), "Projectiles/slash")
+            texture = arcade.load_texture(f"{path}{frame}.png")
+            self.slash_textures.append((texture, texture.flip_left_right()))
 
-        self.active_slashes = arcade.SpriteList()
+
 
 
         self.show_collected_popup = False
@@ -200,10 +222,11 @@ class GameView(arcade.Window):
                 "use_spatial_hash": True 
             }
         }
-        map_path = os.path.join(os.path.dirname(__file__), "stage_1.tmx")
-        self.tile_map = arcade.load_tilemap(map_path, scaling=TILE_SCALING, layer_options=layer_options)
+        map_path = os.path.join(os.path.dirname(__file__), "stage_1.json")
+        self.tile_map = arcade.load_tilemap(map_path, scaling=TILE_SCALING, layer_options=layer_options, use_spatial_hash=True)
 
         self.scene = arcade.Scene.from_tilemap(self.tile_map)
+
 
 
         self.player_sprite_list = arcade.SpriteList()
@@ -215,7 +238,8 @@ class GameView(arcade.Window):
             self.jump_texture_pair,
             self.fall_texture_pair,
             self.land_texture_pair,
-            self.roll_textures
+            self.roll_textures,
+            self.swing_textures
         )
         self.player.center_x = WINDOW_WIDTH / 2
         self.player.center_y = WINDOW_HEIGHT / 2
@@ -232,36 +256,14 @@ class GameView(arcade.Window):
 
 
 
-    def on_draw(self):
-        self.clear()
-        self.background_list.draw()
-        self.camera.use()
-
-
-        self.scene.draw()
-        self.gui_camera.use()
-
-
-        if self.show_collected_popup:
-            text = f"{item_list[-1]} Collected"
-            font_size = 24
-            x = WINDOW_WIDTH // 2 - 100 
-            y = 40 
-
-            arcade.draw_text(
-                text,
-                x,
-                y,
-                arcade.color.WHITE,
-                font_size,
-                bold=True
-            )
+    
 
 
     def on_update(self, delta_time):
         self.physics_engine.update()
         self.player_sprite_list.update()
         self.player.update_animation(delta_time)
+        self.scene.update_animation(delta_time)
 
         self.camera.position = self.player.position
 
@@ -279,7 +281,7 @@ class GameView(arcade.Window):
             self.roll_timer -= delta_time
             # Bigger boost if in air
             if self.player.change_y != 0:
-                roll_speed = 50
+                roll_speed = 25
             else:
                 roll_speed = 20
 
@@ -289,15 +291,65 @@ class GameView(arcade.Window):
             if self.roll_timer <= 0:
                 self.is_rolling = False
                 self.player.is_rolling = False
-                self.player.cur_roll_frame = 0  # Reset animation
-                self.player.change_x = 0
+                self.player.cur_roll_frame = 0
                 self.roll_cooldown_timer = 0
                 self.can_roll = False
+
+                # Resume movement if keys are still held, otherwise stop
+                if self.left_held:
+                    self.player.change_x = -self.base_speed
+                elif self.right_held:
+                    self.player.change_x = self.base_speed
+                else:
+                    self.player.change_x = 0
 
         if not self.can_roll and not self.is_rolling:
             self.roll_cooldown_timer -= delta_time
             if self.roll_cooldown_timer <= 0:
                 self.can_roll = True
+
+        # Overide direction for a quick tap
+        if not self.is_rolling:
+            if self.last_direction_key == "left":
+                self.player.change_x = -self.base_speed
+            elif self.last_direction_key == "right":
+                self.player.change_x = self.base_speed
+            else:
+                self.player.change_x = 0
+        
+        if self.player.is_attacking:
+            frame = self.player.cur_swing_frame // UPDATES_PER_FRAME
+            if frame < len(self.player.swing_textures):
+                direction = self.player.character_face_direction
+                self.player.texture = self.player.swing_textures[frame][direction]
+                self.player.cur_swing_frame += 1
+            else:
+                self.player.is_attacking = False
+                self.player.cur_swing_frame = 0
+
+            if self.slash_sprite:
+                # Always follow the player
+                self.slash_sprite.center_x = self.player.center_x
+                self.slash_sprite.center_y = self.player.center_y
+
+                # Increment frame timer
+                self.slash_timer += 1
+
+                if self.slash_timer >= UPDATES_PER_FRAME:
+                    self.slash_timer = 0
+                    self.slash_frame += 1
+
+                    if self.slash_frame >= len(self.slash_textures):
+                        # Animation finished
+                        self.slash_sprite = None
+                    else:
+                        direction = self.player.character_face_direction
+                        self.slash_sprite.texture = self.slash_textures[self.slash_frame][direction]
+
+
+
+
+
 
         
 
@@ -313,12 +365,13 @@ class GameView(arcade.Window):
         dmg_stat = 1
         
         if key == arcade.key.E:
-            gold_stat = self.gold_stat
+            gold_stat = self.base_gold
             # Check for chests the player is touching
             chest_hit_list = arcade.check_for_collision_with_list(self.player, self.scene["Chests"])
             for chest in chest_hit_list:
+                gold_stat = self.base_gold
                 if gold_stat >= 20:
-                    gold_stat -= 20
+                    self.base_gold -= 20
                     chest.remove_from_sprite_lists()
 
                     selected_item = random.choice(common_item_pool)
@@ -327,10 +380,13 @@ class GameView(arcade.Window):
 
                     if selected_item == "SpeedUp":
                         print("SPEED UP!")
+                        self.base_speed += 2
                     elif selected_item == "DmgUp":
                         print("DMG UP!")
+                        self.base_dmg += 1
                     elif selected_item == "JumpUp":
                         print("JUMP UP!")
+                        self.base_jump += 2
 
                     #Pop up menu 
                     self.show_collected_popup = True
@@ -338,31 +394,34 @@ class GameView(arcade.Window):
                 elif gold_stat < 20:
                     print("Not enough GOLD!")
                     
-                
+        elif key == arcade.key.K:
+            self.base_gold += 80
         # Jump
         elif key in (arcade.key.UP, arcade.key.W, arcade.key.SPACE) and not self.is_rolling:
             if self.physics_engine.can_jump():
-                jump_stat = 20
-                for item in item_list:
-                    if item == "JumpUp":
-                        jump_stat +=3
+                jump_stat = self.base_jump
                 self.player.change_y = jump_stat
                 
 
         # Move left/right
-        elif key in (arcade.key.LEFT, arcade.key.A, arcade.key.RIGHT, arcade.key.D) and not self.is_rolling:
-            for item in item_list:
-                if item == "SpeedUp":
-                    speed_stat += 3
+        elif key in (arcade.key.LEFT, arcade.key.A, arcade.key.RIGHT, arcade.key.D):
+            speed_stat = self.base_speed
             if key in (arcade.key.LEFT, arcade.key.A):
-                self.player.change_x = -speed_stat
+                self.left_held = True
+                self.last_direction_key = "left"
+                if not self.is_rolling:
+                    self.player.change_x = -speed_stat
+
             elif key in (arcade.key.RIGHT, arcade.key.D):
-                self.player.change_x = speed_stat
+                self.right_held = True
+                self.last_direction_key = "right"
+                if not self.is_rolling:
+                    self.player.change_x = speed_stat
 
 
         elif key == arcade.key.LSHIFT and self.can_roll and not self.is_rolling:
             self.is_rolling = True
-            self.roll_timer = 0.5
+            self.roll_timer = 0.3
 
             if self.player.character_face_direction == RIGHT_FACING:
                 self.roll_direction = 1
@@ -374,22 +433,63 @@ class GameView(arcade.Window):
             arcade.close_window()
 
         #   Melee Attack
-        elif key == arcade.key.C:
-            for item in item_list:
-                if item == "DmgUp":
-                    damage_stat += 1
+        elif key == arcade.key.C and not self.player.is_attacking and not self.is_rolling:
+            self.player.is_attacking = True
+            self.player.cur_swing_frame = 0
 
-        
-        
+            self.slash_frame = 0
+            self.slash_timer = 0
+            direction = self.player.character_face_direction
+            texture = self.slash_textures[0][direction]
+            self.slash_sprite = arcade.Sprite(center_x=self.player.center_x,
+                                              center_y=self.player.center_y,
+                                              texture=texture,
+                                              scale=CHARACTER_SCALING)
+
+ 
+            
             
 
 
     def on_key_release(self, key, modifiers):
-        if key in (arcade.key.LEFT, arcade.key.A, arcade.key.RIGHT, arcade.key.D, arcade.key.LSHIFT):
-            if not self.is_rolling: 
-                self.player.change_x = 0
+        if key in (arcade.key.LEFT, arcade.key.A):
+            self.left_held = False
+            if self.last_direction_key == "left":
+                self.last_direction_key = "right" if self.right_held else None
+
+        elif key in (arcade.key.RIGHT, arcade.key.D):
+            self.right_held = False
+            if self.last_direction_key == "right":
+                self.last_direction_key = "left" if self.left_held else None
+
+    def on_draw(self):
+            self.clear()
+            self.background_list.draw()
+            self.camera.use()
 
 
+            self.scene.draw()
+            if self.slash_sprite:
+                self.slash_sprite.draw()
+            self.gui_camera.use()
+
+
+
+
+            if self.show_collected_popup:
+                text = f"{item_list[-1]} Collected"
+                font_size = 24
+                x = WINDOW_WIDTH // 2 - 100 
+                y = 40 
+
+                arcade.draw_text(
+                    text,
+                    x,
+                    y,
+                    arcade.color.WHITE,
+                    font_size,
+                    bold=True
+                )
 def main():
     window = GameView()
     window.setup()
