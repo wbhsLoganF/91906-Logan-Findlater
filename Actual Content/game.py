@@ -32,6 +32,7 @@ rare_item_pool = ["DoubleJump", "ExtraLife", ]
 #Collected items
 item_list = []
 
+
 class PlayerCharacter(arcade.Sprite):
     def __init__(self, idle_texture_pair, walk_texture_pairs, jump_texture_pair, fall_texture_pair, land_texture_pair, roll_texture_pairs, swing_texture_pairs):
         self.character_face_direction = RIGHT_FACING
@@ -120,8 +121,7 @@ class PlayerCharacter(arcade.Sprite):
                 return
             
             return
-
-
+        
 class GameView(arcade.Window):
     def __init__(self):
         super().__init__(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE)
@@ -181,23 +181,25 @@ class GameView(arcade.Window):
             texture = arcade.load_texture(f"{character}_swing{frame}.png")
             self.swing_textures.append((texture, texture.flip_left_right()))
 
-        self.slash_textures = []
-        self.slash_sprite = None
-        self.slash_frame = 0
-        self.slash_timer = 0
-        for frame in range(1, 10):
-            path = os.path.join(os.path.dirname(__file__), "Projectiles/slash")
-            texture = arcade.load_texture(f"{path}{frame}.png")
-            self.slash_textures.append((texture, texture.flip_left_right()))
+        '''
+        self.enemy_texture_pairs = []
+        path = os.path.join(os.path.dirname(__file__), "Characters/Enemies/spider")
+        for i in range(1, 6):
+            texture = arcade.load_texture(f"{path}{i}.png")
+            self.enemy_texture_pairs.append((texture, texture.flip_left_right()))
+            '''
 
 
-        self.show_gold = True
+
+
 
         self.show_collected_popup = False
         self.popup_timer = 0
         self.show_dmg_popup = False
         self.show_door_popup = False
         self.show_gold = True
+
+        self.show_controls = True
 
 
         background_path = os.path.join(os.path.dirname(__file__), "cave_background.png")
@@ -286,6 +288,7 @@ class GameView(arcade.Window):
                 self.show_collected_popup = False
 
 
+
         # Rolling
         self.player.is_rolling = self.is_rolling
         if self.is_rolling:
@@ -340,10 +343,6 @@ class GameView(arcade.Window):
         
         if len(self.scene["Chests"]) == 0:
             self.show_door_popup = True 
-
-
-
-
 
 
         
@@ -428,19 +427,6 @@ class GameView(arcade.Window):
             self.player.is_attacking = True
             self.player.cur_swing_frame = 0
 
-            self.slash_frame = 0
-            self.slash_timer = 0
-            direction = self.player.character_face_direction
-            texture = self.slash_textures[0][direction]
-            self.slash_sprite = arcade.Sprite(center_x=self.player.center_x,
-                                              center_y=self.player.center_y,
-                                              texture=texture,
-                                              scale=CHARACTER_SCALING)
-
- 
-            
-            
-
 
     def on_key_release(self, key, modifiers):
         if key in (arcade.key.LEFT, arcade.key.A):
@@ -460,16 +446,15 @@ class GameView(arcade.Window):
 
 
         self.scene.draw()
-        if self.slash_sprite:
-            self.slash_sprite.draw()
+
         self.gui_camera.use()
 
-
+        
 
         if self.show_dmg_popup:
             text= f"You died and lost all of your gold!"
             font_size = 24
-            x = WINDOW_WIDTH // 2 - 100 
+            x = WINDOW_WIDTH // 2 -200
             y = 40 
             self.base_gold = 0
             arcade.draw_text(
@@ -484,7 +469,7 @@ class GameView(arcade.Window):
         if self.show_collected_popup:
             text = f"{item_list[-1]} Collected"
             font_size = 24
-            x = WINDOW_WIDTH // 2 - 100 
+            x = WINDOW_WIDTH // 2 - 90 
             y = 40 
 
             arcade.draw_text(
@@ -504,6 +489,20 @@ class GameView(arcade.Window):
             font_size = 18
             x = WINDOW_WIDTH // 1 - 100 
             y = 10
+
+            arcade.draw_text(
+                text,
+                x,
+                y,
+                arcade.color.WHITE,
+                font_size,
+            )
+
+        if self.show_controls:
+            text = f"C = Attack \n  LSHIFT = Roll   \n  E = Open chest \n  K = Collect dividends from the kingdom"
+            font_size = 18
+            x = WINDOW_WIDTH // 1 - 1000 
+            y = 650
 
             arcade.draw_text(
                 text,
