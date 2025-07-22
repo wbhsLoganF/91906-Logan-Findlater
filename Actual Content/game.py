@@ -202,10 +202,10 @@ class GameView(arcade.Window):
         self.show_controls = True
 
 
-        background_path = os.path.join(os.path.dirname(__file__), "cave_background.png")
+        background_path = os.path.join(os.path.dirname(__file__),"cave_background_1.png")
         bg = arcade.Sprite(background_path)
         bg.center_x = WINDOW_WIDTH // 2
-        bg.center_y = WINDOW_HEIGHT // 2
+        bg.center_y = WINDOW_HEIGHT
         bg.width = WINDOW_WIDTH
         bg.height = WINDOW_HEIGHT
         self.background_list = arcade.SpriteList()
@@ -260,7 +260,7 @@ class GameView(arcade.Window):
             self.player, walls=self.scene["Platforms"], gravity_constant=GRAVITY
         )
 
-        self.camera = arcade.Camera2D(zoom=0.4)
+        self.camera = arcade.Camera2D(zoom=0.7)
         self.gui_camera = arcade.Camera2D()
 
 
@@ -443,7 +443,7 @@ class GameView(arcade.Window):
         self.clear()
         self.background_list.draw()
         self.camera.use()
-
+        
 
         self.scene.draw()
 
@@ -452,10 +452,10 @@ class GameView(arcade.Window):
         
 
         if self.show_dmg_popup:
-            text= f"You died and lost all of your gold!"
-            font_size = 24
-            x = WINDOW_WIDTH // 2 -200
-            y = 40 
+            text= f"YOU DIED"
+            font_size = 164
+            x = WINDOW_WIDTH // 2 - 400
+            y = 200 
             self.base_gold = 0
             arcade.draw_text(
                 text,
@@ -470,7 +470,7 @@ class GameView(arcade.Window):
             text = f"{item_list[-1]} Collected"
             font_size = 24
             x = WINDOW_WIDTH // 2 - 90 
-            y = 40 
+            y = 60 
 
             arcade.draw_text(
                 text,
