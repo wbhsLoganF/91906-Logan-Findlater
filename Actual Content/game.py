@@ -204,15 +204,15 @@ class GameView(arcade.Window):
 
         background_path = os.path.join(os.path.dirname(__file__),"cave_background_1.png")
         bg = arcade.Sprite(background_path)
-        bg.center_x = WINDOW_WIDTH // 2
-        bg.center_y = WINDOW_HEIGHT
-        bg.width = WINDOW_WIDTH
-        bg.height = WINDOW_HEIGHT
+        bg.center_x = 6400
+        bg.center_y = 1250
+        bg.width = 12800
+        bg.height = 2000
         self.background_list = arcade.SpriteList()
         self.background_list.append(bg)
 
 
-
+        arcade.set_background_color((44, 31, 22))
         
     def setup(self):
         layer_options = {
@@ -260,7 +260,7 @@ class GameView(arcade.Window):
             self.player, walls=self.scene["Platforms"], gravity_constant=GRAVITY
         )
 
-        self.camera = arcade.Camera2D(zoom=0.7)
+        self.camera = arcade.Camera2D(zoom=0.6)
         self.gui_camera = arcade.Camera2D()
 
 
@@ -441,9 +441,9 @@ class GameView(arcade.Window):
 
     def on_draw(self):
         self.clear()
-        self.background_list.draw()
-        self.camera.use()
         
+        self.camera.use()
+        self.background_list.draw()
 
         self.scene.draw()
 
