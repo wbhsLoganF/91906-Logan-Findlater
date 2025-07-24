@@ -8,11 +8,8 @@ WINDOW_HEIGHT = 720
 WINDOW_TITLE = "TITLE"
 
 TILE_SCALING = 1
-PLAYER_JUMP_SPEED = 20
-jump_stat = 20
-GRAVITY = 1
+GRAVITY = 0.9
 
-speed_stat = 10
 UPDATES_PER_FRAME = 7
 
 RIGHT_FACING = 0
@@ -20,11 +17,6 @@ LEFT_FACING = 1
 
 CHARACTER_SCALING = 1
 
-
-speed_stat = 10
-jump_stat = 20
-dmg_stat = 1
-gold_stat = 0
 
 #All available 
 common_item_pool = ["SpeedUp", "DmgUp", "JumpUp"]
@@ -145,8 +137,8 @@ class GameView(arcade.Window):
         self.roll_cooldown_timer = 0
         self.roll_direction = 0
 
-        self.base_speed = 10
-        self.base_jump = 20
+        self.base_speed = 8
+        self.base_jump = 18
         self.base_dmg = 1
         self.base_gold = 0
 
@@ -260,7 +252,7 @@ class GameView(arcade.Window):
             self.player, walls=self.scene["Platforms"], gravity_constant=GRAVITY
         )
 
-        self.camera = arcade.Camera2D(zoom=0.6)
+        self.camera = arcade.Camera2D(zoom=0.45)
         self.gui_camera = arcade.Camera2D()
 
 
@@ -270,7 +262,7 @@ class GameView(arcade.Window):
         self.player.update_animation(delta_time)
         self.scene.update_animation(delta_time)
 
-        self.camera.position = self.player.position
+        self.camera.position = self.player.position 
 
         if arcade.check_for_collision_with_list(self.player, self.scene["Obstacles"]) or arcade.check_for_collision_with_list(self.player, self.scene["Moving_enemies"]) or arcade.check_for_collision_with_list(self.player, self.scene["Enemies"]):
             self.reset_player_position()
@@ -293,12 +285,7 @@ class GameView(arcade.Window):
         self.player.is_rolling = self.is_rolling
         if self.is_rolling:
             self.roll_timer -= delta_time
-            # Bigger roll boost if in air
-            if self.player.change_y != 0:
-                roll_speed = 25
-            else:
-                roll_speed = 20
-
+            roll_speed = self.base_speed + 10
             self.player.change_x = self.roll_direction * roll_speed
                 
 
