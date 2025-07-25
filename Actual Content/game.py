@@ -256,6 +256,12 @@ class GameView(arcade.Window):
         self.gui_camera = arcade.Camera2D()
 
 
+
+
+
+
+
+
     def on_update(self, delta_time):
         self.physics_engine.update()
         self.player_sprite_list.update()
@@ -264,7 +270,11 @@ class GameView(arcade.Window):
 
         self.camera.position = self.player.position 
 
-        if arcade.check_for_collision_with_list(self.player, self.scene["Obstacles"]) or arcade.check_for_collision_with_list(self.player, self.scene["Moving_enemies"]) or arcade.check_for_collision_with_list(self.player, self.scene["Enemies"]):
+        if arcade.check_for_collision_with_list(self.player, self.scene["Obstacles"]) or arcade.check_for_collision_with_list(self.player, self.scene["Moving_enemies"]) or arcade.check_for_collision_with_list(self.player, self.scene["Enemies"]) and not self.is_rolling:
+            self.reset_player_position()
+            self.show_dmg_popup = True
+            self.popup_timer = 5.0
+        if arcade.check_for_collision_with_list(self.player, self.scene["Obstacles"]):
             self.reset_player_position()
             self.show_dmg_popup = True
             self.popup_timer = 5.0
@@ -439,9 +449,9 @@ class GameView(arcade.Window):
         
 
         if self.show_dmg_popup:
-            text= f"YOU DIED"
-            font_size = 164
-            x = WINDOW_WIDTH // 2 - 400
+            text= f"YOU DIED L BOZO"
+            font_size = 200
+            x = WINDOW_WIDTH // 2 - 700
             y = 200 
             self.base_gold = 0
             arcade.draw_text(
@@ -486,8 +496,8 @@ class GameView(arcade.Window):
             )
 
         if self.show_controls:
-            text = f"C = Attack \n  LSHIFT = Roll   \n  E = Open chest \n  K = Collect dividends from the kingdom"
-            font_size = 18
+            text = f"C=Attack   LSHIFT=Roll     E=Open chest     K=Collect dividends from the kingdom"
+            font_size = 18 
             x = WINDOW_WIDTH // 1 - 1000 
             y = 650
 
