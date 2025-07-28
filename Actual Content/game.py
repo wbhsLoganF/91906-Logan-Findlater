@@ -19,7 +19,7 @@ CHARACTER_SCALING = 1
 
 
 #All available 
-common_item_pool = ["SpeedUp", "DmgUp", "JumpUp"]
+common_item_pool = ["SpeedUp", "JumpUp"]
 rare_item_pool = ["DoubleJump", "ExtraLife", ]
 #Collected items
 item_list = []
@@ -189,7 +189,7 @@ class GameView(arcade.Window):
         self.show_collected_popup = False
         self.popup_timer = 0
         self.show_dmg_popup = False
-        self.show_door_popup = False
+
         self.show_gold = True
         self.not_enough_gold_popup = False
 
@@ -368,8 +368,7 @@ class GameView(arcade.Window):
                 self.player.is_attacking = False
                 self.player.cur_swing_frame = 0
         
-        if len(self.scene["Chests"]) == 0:
-            self.show_door_popup = True 
+
 
 
         
@@ -534,9 +533,6 @@ class GameView(arcade.Window):
                 bold=True
             )
 
-        
-        if self.show_door_popup:
-            self.popup_timer = 10
 
         if self.show_gold: 
             text = f"Gold: {self.base_gold}"
