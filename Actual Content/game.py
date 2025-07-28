@@ -194,6 +194,22 @@ class GameView(arcade.Window):
         self.show_controls = True
 
 
+        self.stages = [
+            {
+                "map": "intro.tmx",
+                "background": "intro.png"
+            },
+            {
+                "map": "stage_1.tmx",
+                "background": "stage_1.png"
+            },
+            {
+                "map": "stage_2.tmx",
+                "background": "stage_2.png"
+            }
+        ]
+        self.current_stage = 0
+
         background_path = os.path.join(os.path.dirname(__file__),"cave_background_1.png")
         bg = arcade.Sprite(background_path)
         bg.center_x = 6400
@@ -206,7 +222,11 @@ class GameView(arcade.Window):
 
         arcade.set_background_color((44, 31, 22))
         
-    def setup(self):
+    def setup(self, stage_index=0):
+        self.current_stage = stage_index
+        stage_data = self.stages[stage_index]
+
+
         layer_options = {
             "Platforms": {
                 "use_spatial_hash": True
@@ -222,9 +242,12 @@ class GameView(arcade.Window):
             },
             "Enemies": {
             "use_spatial_hash": True
-            }
+            },
+            "Exit": {"use_spatial_hash": True},
         }
-        map_path = os.path.join(os.path.dirname(__file__), "stage_1.tmx")
+
+
+        map_path = os.path.join(os.path.dirname(__file__), stage_data["map"])
         self.tile_map = arcade.load_tilemap(map_path, scaling=TILE_SCALING, layer_options=layer_options, use_spatial_hash=True)
         self.scene = arcade.Scene.from_tilemap(self.tile_map)
 
@@ -252,7 +275,7 @@ class GameView(arcade.Window):
             self.player, walls=self.scene["Platforms"], gravity_constant=GRAVITY
         )
 
-        self.camera = arcade.Camera2D(zoom=0.45)
+        self.camera = arcade.Camera2D(zoom=0.6)
         self.gui_camera = arcade.Camera2D()
 
 
@@ -353,6 +376,7 @@ class GameView(arcade.Window):
     def on_key_press(self, key, modifiers):
         if key == arcade.key.E:
             gold_stat = self.base_gold
+
             # Check for chests the player is touching
             chest_hit_list = arcade.check_for_collision_with_list(self.player, self.scene["Chests"])
             for chest in chest_hit_list:
@@ -380,6 +404,14 @@ class GameView(arcade.Window):
                     self.popup_timer = 5.0  
                 elif gold_stat < 20:
                     print("Not enough GOLD!")
+
+
+
+            if "Exit" in self.scene:
+                exit_hit_list = arcade.check_for_collision_with_list(self.player, self.scene["Exit"])
+                if exit_hit_list and self.current_stage < len(self.stages) - 1:
+                    self.setup(self.current_stage + 1)
+                    return
                     
         elif key == arcade.key.K:
             self.base_gold += 80
@@ -449,10 +481,10 @@ class GameView(arcade.Window):
         
 
         if self.show_dmg_popup:
-            text= f"YOU DIED L BOZO"
-            font_size = 200
-            x = WINDOW_WIDTH // 2 - 700
-            y = 200 
+            text= f"You died and lost all of your gold!"
+            font_size = 36
+            x = WINDOW_WIDTH // 2 - 300
+            y = 100 
             self.base_gold = 0
             arcade.draw_text(
                 text,
