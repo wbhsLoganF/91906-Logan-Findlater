@@ -12,16 +12,24 @@
             "dynamicWrapping": true,
             "scaleInDock": 1
         },
+        "//wbfp02.westlake.local/shomes/lf21549/Documents/13DTP/Python/91906/91906-Logan-Findlater/Actual Content/intro.tmx": {
+            "scale": 0.25,
+            "selectedLayer": 2,
+            "viewCenter": {
+                "x": 2388,
+                "y": 2592
+            }
+        },
         "//wbfp02.westlake.local/shomes/lf21549/Documents/13DTP/Python/91906/91906-Logan-Findlater/Actual Content/new_floor.tsx": {
             "dynamicWrapping": false,
             "scaleInDock": 1
         },
         "//wbfp02.westlake.local/shomes/lf21549/Documents/13DTP/Python/91906/91906-Logan-Findlater/Actual Content/stage_1.tmx": {
-            "scale": 0.33,
+            "scale": 0.125,
             "selectedLayer": 1,
             "viewCenter": {
-                "x": 1706.060606060606,
-                "y": 1718.181818181818
+                "x": 10656,
+                "y": 2568
             }
         },
         "//wbfp02.westlake.local/shomes/lf21549/Documents/13DTP/Python/91906/91906-Logan-Findlater/Assets/map_tile_pieces/Fish/Default/TETSTSTS.tsx": {

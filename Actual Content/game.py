@@ -41,6 +41,7 @@ class PlayerCharacter(arcade.Sprite):
 
         self.falling = False
         self.jumping = False
+        self.is_rolling = False
 
         
         self.walk_textures = walk_texture_pairs
@@ -190,6 +191,7 @@ class GameView(arcade.Window):
         self.show_dmg_popup = False
         self.show_door_popup = False
         self.show_gold = True
+        self.not_enough_gold_popup = False
 
         self.show_controls = True
 
@@ -197,27 +199,20 @@ class GameView(arcade.Window):
         self.stages = [
             {
                 "map": "intro.tmx",
-                "background": "intro.png"
+                "background": "stage_1.png"
             },
             {
                 "map": "stage_1.tmx",
                 "background": "stage_1.png"
             },
             {
-                "map": "stage_2.tmx",
+                "map": "stage_1.tmx",
                 "background": "stage_2.png"
             }
         ]
         self.current_stage = 0
 
-        background_path = os.path.join(os.path.dirname(__file__),"cave_background_1.png")
-        bg = arcade.Sprite(background_path)
-        bg.center_x = 6400
-        bg.center_y = 1250
-        bg.width = 12800
-        bg.height = 2000
-        self.background_list = arcade.SpriteList()
-        self.background_list.append(bg)
+
 
 
         arcade.set_background_color((44, 31, 22))
@@ -251,6 +246,15 @@ class GameView(arcade.Window):
         self.tile_map = arcade.load_tilemap(map_path, scaling=TILE_SCALING, layer_options=layer_options, use_spatial_hash=True)
         self.scene = arcade.Scene.from_tilemap(self.tile_map)
 
+        background_path = os.path.join(os.path.dirname(__file__), stage_data["background"])
+        bg = arcade.Sprite(background_path)
+        bg.center_x = 6400
+        bg.center_y = 1250
+        bg.width = 12800
+        bg.height = 2000
+        self.background_list = arcade.SpriteList()
+        self.background_list.append(bg)
+
 
 
         self.player_sprite_list = arcade.SpriteList()
@@ -275,13 +279,8 @@ class GameView(arcade.Window):
             self.player, walls=self.scene["Platforms"], gravity_constant=GRAVITY
         )
 
-        self.camera = arcade.Camera2D(zoom=0.6)
+        self.camera = arcade.Camera2D(zoom=0.7)
         self.gui_camera = arcade.Camera2D()
-
-
-
-
-
 
 
 
@@ -293,17 +292,19 @@ class GameView(arcade.Window):
 
         self.camera.position = self.player.position 
 
-        if arcade.check_for_collision_with_list(self.player, self.scene["Obstacles"]) or arcade.check_for_collision_with_list(self.player, self.scene["Moving_enemies"]) or arcade.check_for_collision_with_list(self.player, self.scene["Enemies"]) and not self.is_rolling:
+        if arcade.check_for_collision_with_list(self.player, self.scene["Moving_enemies"]) or arcade.check_for_collision_with_list(self.player, self.scene["Enemies"]) and not self.is_rolling:
             self.reset_player_position()
             self.show_dmg_popup = True
-            self.popup_timer = 5.0
+            self.popup_timer = 3.0
+
         if arcade.check_for_collision_with_list(self.player, self.scene["Obstacles"]):
             self.reset_player_position()
             self.show_dmg_popup = True
-            self.popup_timer = 5.0
+            self.popup_timer = 3.0
 
         if self.show_dmg_popup: 
             self.popup_timer -= delta_time
+
             if self.popup_timer <= 0:
                 self.show_dmg_popup = False
 
@@ -311,6 +312,12 @@ class GameView(arcade.Window):
             self.popup_timer -= delta_time
             if self.popup_timer <= 0:
                 self.show_collected_popup = False
+                
+        if self.not_enough_gold_popup:
+            self.popup_timer -= delta_time
+            print("e_")
+            if self.popup_timer <= 0:
+                self.not_enough_gold_popup = False
 
 
 
@@ -403,7 +410,8 @@ class GameView(arcade.Window):
                     self.show_collected_popup = True
                     self.popup_timer = 5.0  
                 elif gold_stat < 20:
-                    print("Not enough GOLD!")
+                    self.not_enough_gold_popup = True
+                    self.popup_timer = 3.0
 
 
 
@@ -411,6 +419,7 @@ class GameView(arcade.Window):
                 exit_hit_list = arcade.check_for_collision_with_list(self.player, self.scene["Exit"])
                 if exit_hit_list and self.current_stage < len(self.stages) - 1:
                     self.setup(self.current_stage + 1)
+                    self.reset_player_position()
                     return
                     
         elif key == arcade.key.K:
@@ -509,6 +518,22 @@ class GameView(arcade.Window):
                 font_size,
                 bold=True
             )
+
+        if self.not_enough_gold_popup:
+            text = f"Not enough gold!"
+            font_size = 24
+            x = WINDOW_WIDTH // 2 - 90 
+            y = 60 
+
+            arcade.draw_text(
+                text,
+                x,
+                y,
+                arcade.color.WHITE,
+                font_size,
+                bold=True
+            )
+
         
         if self.show_door_popup:
             self.popup_timer = 10
