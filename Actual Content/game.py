@@ -199,7 +199,7 @@ class GameView(arcade.Window):
         self.stages = [
             {
                 "map": "intro.tmx",
-                "background": "stage_1.png"
+                "background": "intro.png"
             },
             {
                 "map": "stage_1.tmx",
