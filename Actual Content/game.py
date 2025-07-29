@@ -19,7 +19,7 @@ CHARACTER_SCALING = 1
 
 
 #All available 
-common_item_pool = ["SpeedUp", "JumpUp"]
+common_item_pool = ["SpeedUp", "JumpUp", "DmgUp", "RollUp"]
 rare_item_pool = ["DoubleJump", "ExtraLife", ]
 #Collected items
 item_list = []
@@ -57,6 +57,60 @@ class PlayerCharacter(arcade.Sprite):
         self.cur_swing_frame = 0
 
         super().__init__(self.idle_texture_pair[0], scale=CHARACTER_SCALING)
+
+    def on_mouse_press(self, x, y, button, modifiers):
+        """ Called whenever the mouse button is clicked. """
+        self.bullet_list = []
+        bullet = arcade.SpriteSolidColor(width=20, height=5, color=arcade.color.DARK_YELLOW)
+        self.bullet_list.append(bullet)
+
+        # Position the bullet at the player's current location
+        start_x = self.player_sprite.center_x
+        start_y = self.player_sprite.center_y
+        bullet.position = self.player_sprite.position
+
+        # Get from the mouse the destination location for the bullet
+        # IMPORTANT! If you have a scrolling screen, you will also need
+        # to add in self.view_bottom and self.view_left.
+        dest_x = x
+        dest_y = y
+
+        # Do math to calculate how to get the bullet to the destination.
+        # Calculation the angle in radians between the start points
+        # and end points. This is the angle the bullet will travel.
+        x_diff = dest_x - start_x
+        y_diff = dest_y - start_y
+        angle = math.atan2(y_diff, x_diff)
+
+        # What is the 1/2 size of this sprite, so we can figure out how far
+        # away to spawn the bullet
+        size = max(self.player_sprite.width, self.player_sprite.height) / 2
+
+        # Use angle to to spawn bullet away from player in proper direction
+        bullet.center_x += size * math.cos(angle)
+        bullet.center_y += size * math.sin(angle)
+
+        # Set angle of bullet
+        bullet.angle = math.degrees(angle)
+
+        # Gravity to use for the bullet
+        # If we don't use custom gravity, bullet drops too fast, or we have
+        # to make it go too fast.
+        # Force is in relation to bullet's angle.
+        bullet_gravity = (0, -BULLET_GRAVITY)
+
+        # Add the sprite. This needs to be done AFTER setting the fields above.
+        self.physics_engine.add_sprite(bullet,
+                                       mass=BULLET_MASS,
+                                       damping=1.0,
+                                       friction=0.6,
+                                       collision_type="bullet",
+                                       gravity=bullet_gravity,
+                                       elasticity=0.9)
+
+        # Add force to bullet
+        force = (BULLET_MOVE_FORCE, 0)
+        self.physics_engine.apply_force(bullet, force)
 
     def update_animation(self, delta_time: float = 1 / 60):
 
@@ -114,7 +168,18 @@ class PlayerCharacter(arcade.Sprite):
                 return
             
             return
-        
+'''
+class Slash_attack():
+    def __init__(self):
+        start_x = self.player_sprite.center_x
+        start_y = self.player_sprite.center_y
+        self.slash_texture_pairs = []
+        slash_path = os.path.join(os.path.dirname(__file__), "Projectiles/slash")
+        for frame in range(1,10):
+            slash = arcade.load_texture(f"{slash_path}{frame}.png")
+            self.slash_texture_pairs.append((slash, slash.flip_left_right()))
+'''
+
 class GameView(arcade.Window):
     def __init__(self):
         super().__init__(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE)
@@ -141,6 +206,7 @@ class GameView(arcade.Window):
         self.base_speed = 5
         self.base_jump = 18
         self.base_dmg = 1
+        self.base_roll = 0
         self.base_gold = 0
 
         #Setting up all player sprite frames
@@ -269,6 +335,7 @@ class GameView(arcade.Window):
             self.roll_textures,
             self.swing_textures
         )
+
         self.player.center_x = WINDOW_WIDTH / 2 - 400
         self.player.center_y = WINDOW_HEIGHT / 2
         self.player_sprite_list.append(self.player)
@@ -325,7 +392,7 @@ class GameView(arcade.Window):
         self.player.is_rolling = self.is_rolling
         if self.is_rolling:
             self.roll_timer -= delta_time
-            roll_speed = self.base_speed + 5
+            roll_speed = self.base_speed + self.base_roll + 4
             self.player.change_x = self.roll_direction * roll_speed
                 
 
@@ -401,10 +468,14 @@ class GameView(arcade.Window):
                     elif selected_item == "JumpUp":
                         print("JUMP UP!")
                         self.base_jump += 2
+                    elif selected_item == "RollUp":
+                        print("JUMP UP!")
+                        self.base_roll += 2
+
 
                     #Pop up menu 
                     self.show_collected_popup = True
-                    self.popup_timer = 5.0  
+                    self.popup_timer = 4.0  
                 elif gold_stat < 20:
                     self.not_enough_gold_popup = True
                     self.popup_timer = 3.0
@@ -456,7 +527,7 @@ class GameView(arcade.Window):
         elif key in (arcade.key.ESCAPE, arcade.key.Q):
             arcade.close_window()
 
-        #   Melee Attack
+        #  Melee Attack
         elif key == arcade.key.C and not self.player.is_attacking and not self.is_rolling:
             self.player.is_attacking = True
             self.player.cur_swing_frame = 0
@@ -482,8 +553,6 @@ class GameView(arcade.Window):
         self.scene.draw()
 
         self.gui_camera.use()
-
-        
 
         if self.show_dmg_popup:
             text= f"You died and lost all of your gold!"
@@ -530,7 +599,6 @@ class GameView(arcade.Window):
                 bold=True
             )
 
-
         if self.show_gold: 
             text = f"Gold: {self.base_gold}"
             font_size = 18
@@ -558,6 +626,11 @@ class GameView(arcade.Window):
                 arcade.color.WHITE,
                 font_size,
             )
+
+'''
+class Boss():
+    print("e")
+'''
 
 def main():
     window = GameView()

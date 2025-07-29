@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.10" tiledversion="1.11.2" name="'individual images tileset" tilewidth="164" tileheight="128" tilecount="27" columns="0">
+<tileset version="1.10" tiledversion="1.11.0" name="'individual images tileset" tilewidth="164" tileheight="128" tilecount="27" columns="0">
  <grid orientation="orthogonal" width="1" height="1"/>
  <tile id="0">
   <image source="roof_cave_trans.png" width="164" height="64"/>
