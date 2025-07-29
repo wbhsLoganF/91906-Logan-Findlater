@@ -138,7 +138,7 @@ class GameView(arcade.Window):
         self.roll_cooldown_timer = 0
         self.roll_direction = 0
 
-        self.base_speed = 8
+        self.base_speed = 5
         self.base_jump = 18
         self.base_dmg = 1
         self.base_gold = 0
@@ -269,7 +269,7 @@ class GameView(arcade.Window):
             self.roll_textures,
             self.swing_textures
         )
-        self.player.center_x = WINDOW_WIDTH / 2
+        self.player.center_x = WINDOW_WIDTH / 2 - 400
         self.player.center_y = WINDOW_HEIGHT / 2
         self.player_sprite_list.append(self.player)
         self.scene.add_sprite_list_before("Player", "Foreground")
@@ -325,7 +325,7 @@ class GameView(arcade.Window):
         self.player.is_rolling = self.is_rolling
         if self.is_rolling:
             self.roll_timer -= delta_time
-            roll_speed = self.base_speed + 10
+            roll_speed = self.base_speed + 5
             self.player.change_x = self.roll_direction * roll_speed
                 
 
@@ -370,11 +370,8 @@ class GameView(arcade.Window):
         
 
 
-
-        
-
     def reset_player_position(self):
-        self.player.center_x = WINDOW_WIDTH / 2
+        self.player.center_x = WINDOW_WIDTH / 2 - 400
         self.player.center_y = WINDOW_HEIGHT / 2
         self.player.change_x = 0
         self.player.change_y = 0
@@ -549,7 +546,7 @@ class GameView(arcade.Window):
             )
 
         if self.show_controls:
-            text = f"C=Attack   LSHIFT=Roll     E=Open chest     K=Collect dividends from the kingdom"
+            text = f"Shift=Roll     E=Open chest     K=Collect dividends from the kingdom"
             font_size = 18 
             x = WINDOW_WIDTH // 1 - 1000 
             y = 650
