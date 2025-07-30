@@ -573,7 +573,8 @@ class GameView(arcade.Window):
             if "Exit" in self.scene:
                 exit_hit_list = arcade.check_for_collision_with_list(self.player, self.scene["Exit"])
                 if exit_hit_list and self.current_stage < len(self.stages) - 1:
-                    self.setup(self.current_stage + 1)
+                    self.current_stage += 1
+                    self.setup(self.current_stage)
                     self.reset_player_position()
                     return
                     

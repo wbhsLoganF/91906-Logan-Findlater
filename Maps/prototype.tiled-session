@@ -14,11 +14,14 @@
             "scaleInEditor": 1
         },
         "//wbfp02.westlake.local/shomes/lf21549/Documents/13DTP/Python/91906/91906-Logan-Findlater/Actual Content/intro.tmx": {
+            "expandedObjectLayers": [
+                13
+            ],
             "scale": 0.33,
-            "selectedLayer": 1,
+            "selectedLayer": 4,
             "viewCenter": {
-                "x": 2190.909090909091,
-                "y": 2384.848484848485
+                "x": 1103.030303030303,
+                "y": 2103.030303030303
             }
         },
         "//wbfp02.westlake.local/shomes/lf21549/Documents/13DTP/Python/91906/91906-Logan-Findlater/Actual Content/intro_floor.tsx": {
@@ -31,11 +34,11 @@
             "scaleInDock": 1
         },
         "//wbfp02.westlake.local/shomes/lf21549/Documents/13DTP/Python/91906/91906-Logan-Findlater/Actual Content/stage_1.tmx": {
-            "scale": 0.75,
-            "selectedLayer": 4,
+            "scale": 0.33,
+            "selectedLayer": 3,
             "viewCenter": {
-                "x": 6400.666666666666,
-                "y": 1280.6666666666665
+                "x": 1009.0909090909091,
+                "y": 1663.6363636363635
             }
         },
         "//wbfp02.westlake.local/shomes/lf21549/Documents/13DTP/Python/91906/91906-Logan-Findlater/Actual Content/stage_2.tmx": {
@@ -162,10 +165,10 @@
     ],
     "project": "prototype.tiled-project",
     "recentFiles": [
-        "//wbfp02.westlake.local/shomes/lf21549/Documents/13DTP/Python/91906/91906-Logan-Findlater/Actual Content/intro.tmx",
-        "//wbfp02.westlake.local/shomes/lf21549/Documents/13DTP/Python/91906/91906-Logan-Findlater/Actual Content/'individual images tileset.tsx",
         "//wbfp02.westlake.local/shomes/lf21549/Documents/13DTP/Python/91906/91906-Logan-Findlater/Actual Content/intro_floor.tsx",
         "//wbfp02.westlake.local/shomes/lf21549/Documents/13DTP/Python/91906/91906-Logan-Findlater/Actual Content/stage_2.tmx",
+        "//wbfp02.westlake.local/shomes/lf21549/Documents/13DTP/Python/91906/91906-Logan-Findlater/Actual Content/intro.tmx",
+        "//wbfp02.westlake.local/shomes/lf21549/Documents/13DTP/Python/91906/91906-Logan-Findlater/Actual Content/'individual images tileset.tsx",
         "//wbfp02.westlake.local/shomes/lf21549/Documents/13DTP/Python/91906/91906-Logan-Findlater/Actual Content/stage_1.tmx",
         "//wbfp02.westlake.local/shomes/lf21549/Downloads/91906/player_frames/Forrest test.tsx",
         "//wbfp02.westlake.local/shomes/lf21549/Downloads/91906/player_frames/test.tmx",
