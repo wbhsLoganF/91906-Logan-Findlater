@@ -164,6 +164,7 @@
         "//wbfp02.westlake.local/shomes/lf21549/Documents/13DTP/Python/91906/91906-Logan-Findlater/Actual Content/'individual images tileset.tsx"
     ],
     "project": "prototype.tiled-project",
+    "property.type": "string",
     "recentFiles": [
         "//wbfp02.westlake.local/shomes/lf21549/Documents/13DTP/Python/91906/91906-Logan-Findlater/Actual Content/intro_floor.tsx",
         "//wbfp02.westlake.local/shomes/lf21549/Documents/13DTP/Python/91906/91906-Logan-Findlater/Actual Content/stage_2.tmx",

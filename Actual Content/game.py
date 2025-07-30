@@ -389,7 +389,7 @@ class GameView(arcade.Window):
             if "Moving_enemies" in self.tile_map.object_lists:
 
                 # Ensure the sprite list exists before adding to it
-                if "Moving_enemies" is None:
+                if "Moving_enemies" == None:
                     self.scene.add_sprite_list("Moving_enemies")
 
                 for enemy_object in self.tile_map.object_lists["Moving_enemies"]:
