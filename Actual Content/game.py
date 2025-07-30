@@ -20,9 +20,16 @@ CHARACTER_SCALING = 1
 
 #All available 
 common_item_pool = ["SpeedUp", "JumpUp", "DmgUp", "RollUp"]
-rare_item_pool = ["DoubleJump", "ExtraLife", ]
 #Collected items
 item_list = []
+
+def load_texture_pair(filename):
+    """Load a texture pair for left and right facing directions"""
+    return [
+        arcade.load_texture(filename),
+        arcade.load_texture(filename, flipped_horizontally=True)
+    ]
+
 
 
 class PlayerCharacter(arcade.Sprite):
@@ -57,60 +64,6 @@ class PlayerCharacter(arcade.Sprite):
         self.cur_swing_frame = 0
 
         super().__init__(self.idle_texture_pair[0], scale=CHARACTER_SCALING)
-
-    def on_mouse_press(self, x, y, button, modifiers):
-        """ Called whenever the mouse button is clicked. """
-        self.bullet_list = []
-        bullet = arcade.SpriteSolidColor(width=20, height=5, color=arcade.color.DARK_YELLOW)
-        self.bullet_list.append(bullet)
-
-        # Position the bullet at the player's current location
-        start_x = self.player_sprite.center_x
-        start_y = self.player_sprite.center_y
-        bullet.position = self.player_sprite.position
-
-        # Get from the mouse the destination location for the bullet
-        # IMPORTANT! If you have a scrolling screen, you will also need
-        # to add in self.view_bottom and self.view_left.
-        dest_x = x
-        dest_y = y
-
-        # Do math to calculate how to get the bullet to the destination.
-        # Calculation the angle in radians between the start points
-        # and end points. This is the angle the bullet will travel.
-        x_diff = dest_x - start_x
-        y_diff = dest_y - start_y
-        angle = math.atan2(y_diff, x_diff)
-
-        # What is the 1/2 size of this sprite, so we can figure out how far
-        # away to spawn the bullet
-        size = max(self.player_sprite.width, self.player_sprite.height) / 2
-
-        # Use angle to to spawn bullet away from player in proper direction
-        bullet.center_x += size * math.cos(angle)
-        bullet.center_y += size * math.sin(angle)
-
-        # Set angle of bullet
-        bullet.angle = math.degrees(angle)
-
-        # Gravity to use for the bullet
-        # If we don't use custom gravity, bullet drops too fast, or we have
-        # to make it go too fast.
-        # Force is in relation to bullet's angle.
-        bullet_gravity = (0, -BULLET_GRAVITY)
-
-        # Add the sprite. This needs to be done AFTER setting the fields above.
-        self.physics_engine.add_sprite(bullet,
-                                       mass=BULLET_MASS,
-                                       damping=1.0,
-                                       friction=0.6,
-                                       collision_type="bullet",
-                                       gravity=bullet_gravity,
-                                       elasticity=0.9)
-
-        # Add force to bullet
-        force = (BULLET_MOVE_FORCE, 0)
-        self.physics_engine.apply_force(bullet, force)
 
     def update_animation(self, delta_time: float = 1 / 60):
 
@@ -168,6 +121,86 @@ class PlayerCharacter(arcade.Sprite):
                 return
             
             return
+        
+class Entity(arcade.Sprite):
+    def __init__(self, name_folder, name_file):
+        super().__init__()
+
+        # Default to facing right
+        self.facing_direction = RIGHT_FACING
+
+        # Used for image sequences
+        self.cur_texture = 0
+        self.scale = CHARACTER_SCALING
+
+        main_path = f"{name_folder}/{name_file}"
+
+        # Load textures for walking - FIXED: Use correct attribute name
+        self.walk_textures = []  # Changed from enemy_texture_pairs
+        path = os.path.join(os.path.dirname(__file__), "Characters/Enemies/spider")
+        for i in range(1, 6):  # spider1.png to spider5.png
+            texture = arcade.load_texture(f"{path}{i}.png")
+            self.walk_textures.append((texture, texture.flip_left_right()))
+
+        # Set the initial texture - FIXED: Use correct index
+        self.texture = self.walk_textures[0][0]  # [frame][direction]
+
+class Enemy(Entity):
+    def __init__(self, name_folder, name_file):
+        # Setup parent class
+        super().__init__(name_folder, name_file)
+        self.should_update_walk = 0
+
+    def update_animation(self, delta_time: float = 1 / 60):
+        # Figure out if we need to flip face left or right
+        if self.change_x < 0 and self.facing_direction == RIGHT_FACING:
+            self.facing_direction = LEFT_FACING
+        elif self.change_x > 0 and self.facing_direction == LEFT_FACING:
+            self.facing_direction = RIGHT_FACING
+
+        # Walking animation - FIXED: Use correct range for spider textures
+        if self.should_update_walk == 3:
+            self.cur_texture += 1
+            if self.cur_texture > 4:  # Changed from 7 to 4 (spider has 5 frames: 0-4)
+                self.cur_texture = 0
+            self.texture = self.walk_textures[self.cur_texture][self.facing_direction]
+            self.should_update_walk = 0
+            return
+
+        self.should_update_walk += 1
+
+class Spider(Enemy):
+    def __init__(self, name_folder="Enemies", name_file="spider"):
+        super().__init__(name_folder, name_file)
+        
+        # Spider-specific properties
+        self.speed = 1
+        self.direction = 1  # 1 for right, -1 for left
+        self.patrol_distance = 100  # How far to patrol
+        self.start_x = 0.0  # Starting position - ensure it's a float
+        self.health = 1
+        
+    def setup_patrol(self, start_x):
+        """Set up patrol boundaries"""
+        self.start_x = float(start_x)  # Ensure it's a float
+        self.center_x = float(start_x)  # Ensure it's a float
+        
+    def update(self):
+        """Update spider movement and patrol behavior"""
+        # Simple patrol AI - move back and forth
+        # Ensure we're working with floats
+        current_x = float(self.center_x)
+        start_x = float(self.start_x)
+        
+        if abs(current_x - start_x) >= self.patrol_distance:
+            self.direction *= -1  # Reverse direction
+            
+        # Move the spider
+        self.change_x = self.speed * self.direction
+        
+        # Update position and animation
+        super().update()
+        self.update_animation()  # Call animation update
 '''
 class Slash_attack():
     def __init__(self):
@@ -286,6 +319,7 @@ class GameView(arcade.Window):
     def setup(self, stage_index=0):
         self.current_stage = stage_index
         stage_data = self.stages[stage_index]
+        
 
 
         layer_options = {
@@ -341,6 +375,7 @@ class GameView(arcade.Window):
         self.player_sprite_list.append(self.player)
         self.scene.add_sprite_list_before("Player", "Foreground")
         self.scene.add_sprite("Player", self.player)
+        self.scene.add_sprite_list("Moving_enemies")
 
         self.physics_engine = arcade.PhysicsEnginePlatformer(
             self.player, walls=self.scene["Platforms"], gravity_constant=GRAVITY
@@ -349,6 +384,49 @@ class GameView(arcade.Window):
         self.camera = arcade.Camera2D(zoom=0.7)
         self.gui_camera = arcade.Camera2D()
 
+        self.spider_physics_engines = []
+        try:
+            if "Moving_enemies" in self.tile_map.object_lists:
+
+                # Ensure the sprite list exists before adding to it
+                if "Moving_enemies" is None:
+                    self.scene.add_sprite_list("Moving_enemies")
+
+                for enemy_object in self.tile_map.object_lists["Moving_enemies"]:
+                    # Create spider at the object's position
+                    spider = Spider()
+                    
+                    # FIX: Access coordinates properly from Tiled object
+                    # Option 1: If shape is a tuple (x, y)
+                    if hasattr(enemy_object, 'shape') and len(enemy_object.shape) >= 2:
+                        spider.center_x = float(enemy_object.shape[0])
+                        spider.center_y = float(enemy_object.shape[1])
+                    # Option 2: If object has x, y properties directly
+                    elif hasattr(enemy_object, 'x') and hasattr(enemy_object, 'y'):
+                        spider.center_x = float(enemy_object.x)
+                        spider.center_y = float(enemy_object.y)
+                    # Option 3: Try accessing properties dict
+                    else:
+                        # Default position if we can't get coordinates
+                        spider.center_x = 400.0
+                        spider.center_y = 400.0
+                        print(f"Warning: Could not get coordinates for enemy object, using default")
+                    
+                    spider.setup_patrol(spider.center_x)  # Set patrol start position
+                    
+                    # Add spider to the scene
+                    self.scene.add_sprite("Moving_enemies", spider)
+                    
+                    # CREATE PHYSICS ENGINE FOR EACH SPIDER
+                    spider_physics = arcade.PhysicsEnginePlatformer(
+                        spider, walls=self.scene["Platforms"], gravity_constant=GRAVITY
+                    )
+                    self.spider_physics_engines.append(spider_physics)
+                    print(f"Spider spawned at: {spider.center_x}, {spider.center_y}")  # Debug info
+                    
+        except Exception as e:
+            print(f"Error spawning spiders: {e}")
+            print(f"Available object attributes: {dir(enemy_object) if 'enemy_object' in locals() else 'No object'}")
 
 
     def on_update(self, delta_time):
@@ -356,10 +434,18 @@ class GameView(arcade.Window):
         self.player_sprite_list.update()
         self.player.update_animation(delta_time)
         self.scene.update_animation(delta_time)
+        for spider_physics in self.spider_physics_engines:
+            spider_physics.update()
+            spider_list = self.scene.get_sprite_list("Moving_enemies")
+            if spider_list:
+                for spider in spider_list:
+                    # Your spider logic here
+                    pass
+        
 
         self.camera.position = self.player.position 
 
-        if arcade.check_for_collision_with_list(self.player, self.scene["Moving_enemies"]) or arcade.check_for_collision_with_list(self.player, self.scene["Enemies"]) and not self.is_rolling:
+        if (arcade.check_for_collision_with_list(self.player, self.scene["Moving_enemies"]) or arcade.check_for_collision_with_list(self.player, self.scene["Enemies"])) and not self.is_rolling:            
             self.reset_player_position()
             self.show_dmg_popup = True
             self.popup_timer = 3.0
@@ -435,6 +521,8 @@ class GameView(arcade.Window):
                 self.player.is_attacking = False
                 self.player.cur_swing_frame = 0
         
+        for spider in self.scene["Moving_enemies"]:
+            print("e")
 
 
     def reset_player_position(self):
