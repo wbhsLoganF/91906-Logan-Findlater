@@ -5,7 +5,7 @@ import random
 # Game window settings
 WINDOW_WIDTH = 1280
 WINDOW_HEIGHT = 720
-WINDOW_TITLE = "TITLE"
+WINDOW_TITLE = "Will the Knight?"
 
 TILE_SCALING = 1
 GRAVITY = 0.9
